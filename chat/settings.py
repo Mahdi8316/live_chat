@@ -31,8 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    # 'daphne',
-    # 'channels',
+    'daphne',
+    'channels',
     'chat_app',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -68,7 +68,7 @@ TEMPLATES = [
         },
     },
 ]
-
+ASGI_APPLICATION = 'chat.asgi.application'
 WSGI_APPLICATION = 'chat.wsgi.application'
 
 
@@ -123,3 +123,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
