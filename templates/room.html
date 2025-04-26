@@ -305,8 +305,7 @@
     </script>
   </body>
 </html>
-{% endcomment %}
-<!DOCTYPE html>
+{% endcomment %} {% comment %} <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -522,8 +521,8 @@
       <div class="content">
         <h1>Welcome to {{room_name}}</h1>
         <div class="chats-container" id="chats-container">
-          {%for message in messages%} 
-          {% if message.sender.lower == user.lower %}
+          {%for message in messages%} {% if message.sender.lower == user.lower
+          %}
           <div class="single-message sent" data-message-id="{{message.id}}">
             <div class="message-actions">
               <button
@@ -556,7 +555,8 @@
               >{% endif %}
             </div>
             <p class="sender">{{message.sender}}</p>
-          </div>{% endif %} {%endfor%}
+          </div>
+          {% endif %} {%endfor%}
         </div>
         <form action="" id="msg-form" method="post">
           <textarea
@@ -799,3 +799,4 @@
     </script>
   </body>
 </html>
+{% endcomment %}
