@@ -20,18 +20,44 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # print("Recieved Data")
         data_json = json.loads(text_data)
         # print(data_json)
-
-        event = {"type": "send_message", "message": data_json}
+        if data_json.get('action') == 'edit':
+            event = {"type": "edit_message", "message" : data_json}
+        else:
+            event = {"type": "send_message", "message" : data_json}
+            
+        
+        # event = {"type": "send_message", "message": data_json}
 
         await self.channel_layer.group_send(self.room_name, event)
 
     async def send_message(self, event):
         data = event["message"]
-        await self.create_message(data=data)
+        message = await self.create_message(data=data)
 
-        response = {"sender": data["sender"], "message": data["message"]}
+        # response = {"sender": data["sender"], "message": data["message"]}
+        response = {
+            "action": "new",
+            "id": message.id,
+            "sender": data["sender"], 
+            "message": data["message"],
+            "timestamp": message.timestamp.isoformat()
+        }
+        
+        # await self.send(text_data=json.dumps({"message": response}))
+        await self.send(text_data=json.dumps(response))
+    async def edit_message(self, event):
+        data = event["message"]
+        success = await self.update_message(data=data)
 
-        await self.send(text_data=json.dumps({"message": response}))
+        if success:
+            response = {
+                "action": "edit",
+                "id": data["message_id"],
+                "sender": data["sender"], 
+                "new_message": data["new_message"],
+                "edited": True
+            }
+            await self.send(text_data=json.dumps(response))
 
     @database_sync_to_async
     def create_message(self, data):
@@ -43,3 +69,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
             new_message = Message.objects.create(
                 room=get_room, message=data["message"], sender=data["sender"]
             )
+            return new_message
+        return None
+    @database_sync_to_async
+    def update_message(self, data):
+        try:
+            message = Message.objects.get(
+                id=data["message_id"],
+                sender=data["sender"]  # Ensure only sender can edit
+            )
+            message.message = data["new_message"]
+            message.edited = True
+            message.save()
+            return True
+        except Message.DoesNotExist:
+            return False
